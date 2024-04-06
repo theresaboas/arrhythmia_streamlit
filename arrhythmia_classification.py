@@ -94,11 +94,12 @@ def uci_bilkent_dataset():
         models = {
         'logistic_regression' : joblib.load('models/uci_logistic_regression_model.joblib'),
         'random_forest' : joblib.load('models/uci_random_forest_model.joblib'),
-        'svc' : joblib.load('models/uci_svc_model.joblib'),
+        'svc' : joblib.load('models/uci_svc_model.joblib')
         #'elasticnet' : joblib.load('models/uci_elasticnet_model.joblib'),
         #'adaboost' : joblib.load('models/uci_adaboost_model.joblib'),
         #'gradientboost' : joblib.load('models/uci_gradientboost_model.joblib'),
-        #'xgboost' : joblib.load('models/uci_xgboost_model.joblib')}
+        #'xgboost' : joblib.load('models/uci_xgboost_model.joblib')
+        }
         
         st.title('Model Selection')
 
