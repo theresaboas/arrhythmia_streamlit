@@ -11,7 +11,6 @@ from sklearn.utils import resample
 from sklearn.metrics import accuracy_score, recall_score
 import altair as alt 
 import networkx as nx
-import streamlit_shadcn_ui as ui
 
 def introduction():
     video_path = "ECG_video.mp4"
@@ -44,7 +43,6 @@ def uci_bilkent_dataset():
     if selected_page == "Exploration":
         st.write("## Exploratory Data Analysis")
         st.dataframe(df.head(10))
-        ui.table(data=df, maxHeight=300)
         st.write(df.shape)
         st.dataframe(df.describe())
         
