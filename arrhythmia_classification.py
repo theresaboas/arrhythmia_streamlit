@@ -4,17 +4,34 @@ import numpy as np
 import matplotlib.pyplot as plt
 import joblib
 import seaborn as sns
-import os
+import requests
+from streamlit_lottie import st_lottie
 from sklearn.decomposition import PCA
 from sklearn.model_selection import train_test_split
 from sklearn.utils import resample
-from sklearn.metrics import accuracy_score, recall_score
+from sklearn.metrics import accuracy_score, recall_score, classification_report, confusion_matrix
 import altair as alt 
 import networkx as nx
 
+# ---- Page Title with Icon ----
+st.set_page_config(page_title='Arrhythmia Classification', page_icon=':anatomical_heart:', layout='wide')
+
+# ---- Load GFX Assets ----
+
+def load_lottieurl(url):
+    r = requests.get(url)
+    if r.status_code != 200:
+        return None
+    return r.json()
+
+ecg_gfx = 'https://lottie.host/37bfe504-9620-477e-ad38-f32dfe93f35a/U98tiX7gVS.json'
+
+# ---- Introduction ----
+
 def introduction():
-    video_path = "ECG_video.mp4"
-    st.video(video_path)
+#    video_path = "ECG_video.mp4"
+#    st.video(video_path)
+    st_lottie(ecg_gfx, height=250)
 
     st.title("Introduction")
     introduction_text = """
@@ -34,11 +51,15 @@ def introduction():
     st.subheader("Step 3: Performance evaluation")
     st.write("This step involves systematically evaluating model performance based on metrics like accuracy and recall. A main focus is placed on the number of undetected arrhythmia cases as evident in number of false negatives.")
 
+# ---- UCI Bilkent Dataset ----
+
 def uci_bilkent_dataset():
     st.title("UCI-Bilkent Dataset")
     selected_page = st.sidebar.selectbox("Select Page", ["Exploration", "Preprocessing and Feature Engineering", "Modelling"])
     # Read UCI-Bilkent Dataset
-    df = pd.read_csv('arrhythmia.csv')
+    df = pd.read_csv('uci-bilkent_arrhythmia_dataset_preprocessed.csv')
+    input_data = pd.read_csv('uci_x_train.csv')
+    target_values= pd.read_csv('uci_y_train.csv')
 
     if selected_page == "Exploration":
         st.write("## Exploratory Data Analysis")
@@ -68,6 +89,72 @@ def uci_bilkent_dataset():
         }
         hyperparameter_table = pd.DataFrame(data)
         st.table(hyperparameter_table)
+       
+       # Load multiple models
+        models = {
+        'logistic_regression' : joblib.load('models/uci_logistic_regression_model.joblib'),
+        'random_forest' : joblib.load('models/uci_random_forest_model.joblib'),
+        'svc' : joblib.load('models/uci_svc_model.joblib'),
+        'elasticnet' : joblib.load('models/uci_elasticnet_model.joblib'),
+        'adaboost' : joblib.load('models/uci_adaboost_model.joblib'),
+        'gradientboost' : joblib.load('models/uci_gradientboost_model.joblib'),
+        'xgboost' : joblib.load('models/uci_xgboost_model.joblib')}
+        
+        st.title('Model Selection')
+
+        # Model selection widget
+        selected_model = st.selectbox('Select Model', list(models.keys()))
+
+        # Define a function to make predictions
+        def predict(model, input_data):
+            return model.predict(input_data)
+
+        # Make prediction based on selected model
+        if selected_model in models:
+            prediction = predict(models[selected_model], input_data)
+
+            # Display model attributes
+            show_model_attributes = st.checkbox("Show Model Attributes")
+            if show_model_attributes:
+                st.subheader('Model Attributes:')
+                model_attributes_box = st.empty()  
+                model_attributes = models[selected_model].get_params()
+                model_attributes_box.write(model_attributes)
+
+            # Display performance summary
+            if hasattr(models[selected_model], 'score'):
+                accuracy = models[selected_model].score(input_data, target_values)  
+                rounded_accuracy = round(accuracy, 4)  
+                st.subheader('Model Performance Summary:')
+                st.write(f'Accuracy: {rounded_accuracy}')
+
+            # Display confusion matrix
+            if hasattr(models[selected_model], 'predict'):
+                # Display classification report
+                st.subheader('Classification Report:')
+                report = classification_report(target_values, prediction)  
+                st.text(report)
+
+                st.subheader('Confusion Matrix:')
+                cm = confusion_matrix(target_values, prediction)  
+
+                # Plot confusion matrix
+                fig, ax = plt.subplots()
+                sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False, square=True, ax=ax)
+                ax.set_xlabel('Predicted')  # Fix here
+                ax.set_ylabel('Actual')
+    
+                # Display confusion matrix plot
+                st.pyplot(fig)
+        else:
+            st.write('No model selected.')
+
+
+
+
+        
+
+# ---- MIT BIH Dataset ----
 
 def mit_bih_dataset():
     st.title("MIT-BIH Dataset")
@@ -216,6 +303,8 @@ def mit_bih_dataset():
         image = open(image_path, 'rb').read()
         st.image(image, caption='', use_column_width=True)
 
+# ---- Conclusions ----
+
 def conclusions():
     st.title("Conclusions")    
     conclusion_text = """
@@ -270,6 +359,7 @@ def conclusions():
     st.write("## Conclusions:")
     st.write(conclusion_text)
 
+# ---- Main / Sidebar ----
 
 def main():
     st.sidebar.title("Classification of Arrhythmia")
