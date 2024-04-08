@@ -13,6 +13,7 @@ from sklearn.metrics import accuracy_score, recall_score, classification_report,
 import altair as alt 
 import networkx as nx
 import xgboost as xgb
+from sklearn.preprocessing import StandardScaler
 
 # ---- Page Title with Icon ----
 st.set_page_config(page_title='Arrhythmia Classification', page_icon=':anatomical_heart:', layout='wide')
@@ -88,6 +89,60 @@ def uci_bilkent_dataset():
 
     elif selected_page == "Preprocessing and Feature Engineering":
         st.write("## Preprocessing and Feature Engineering")
+        
+        # Load data
+        df = pd.read_csv('arrhythmia_preprocessed_cleaned_classes_label.csv')
+
+        # Separate features and target variable
+        X = df.drop(['class','label'], axis=1)  # Features
+        y = df['label']  # Target variable
+
+        # Standardize the features
+        scaler = StandardScaler()
+        X_scaled = scaler.fit_transform(X)
+
+        # Define a function to perform PCA and return transformed data
+        def perform_pca(n_components):
+            pca = PCA(n_components=n_components)
+            X_pca = pca.fit_transform(X_scaled)
+            return X_pca, pca.explained_variance_ratio_, pca.components_
+
+        # Streamlit app
+        def main():
+            st.title("PCA Visualization")
+
+            # Sidebar options
+            st.sidebar.header("Options")
+            n_components = st.sidebar.select_slider("Number of PCA Components", options=[30, 40, 50, 55, 60, 65, 70, 75, 78, 80, 85, 90, 95, 100])
+
+            # Perform PCA
+            X_pca, explained_variance_ratio, components = perform_pca(n_components)
+
+            # Display cumulative variance ratio plot
+            fig, ax = plt.subplots()
+            ax.plot(range(1, n_components+1), explained_variance_ratio.cumsum(), marker='o', linestyle='-')
+            ax.axhline(y=0.9, color='r', linestyle='--', label='90% Variance')
+            ax.set_xlabel("Number of Components")
+            ax.set_ylabel("Cumulative Variance Ratio")
+            ax.set_title("Cumulative Variance Ratio vs. Number of Components")
+            st.pyplot(fig)
+
+            # Display explained variance ratio for each component
+            st.subheader("Explained Variance Ratio for Each Component")
+            fig2, ax2 = plt.subplots()
+            ax2.plot(range(1, n_components+1), explained_variance_ratio, marker='o', linestyle='-')
+            ax2.set_xlabel("Number of Components")
+            ax2.set_ylabel("Explained Variance Ratio")
+            ax2.set_title("Explained Variance Ratio for Each Component")
+            st.pyplot(fig2)
+
+            # Display principal components
+            st.subheader("Principal Components")
+            components_df = pd.DataFrame(components, columns=X.columns)
+            st.write(components_df)
+
+        if __name__ == "__main__":       
+            main()
 
     elif selected_page == "Modelling":
         st.write("## Systematic comparison of different Machine Learning Models for Arrhythmia Classification")
@@ -316,7 +371,7 @@ def conclusions():
     Minimizing false negatives is crucial for our project's success.
     - Gradient Boosting achieved the best performance among the models evaluated concerning the number of false negatives, with a very high accuracy of 98%. 
     - DNN and ANN models achieved respectable accuracies ranging from 95% to 96%. 
-    - Overall, Deep learning were outperformed by simpler models like ensemble methods such as Random Forest and Gradient Boosting. 
+    - Overall, Deep learning models were outperformed by simpler models like ensemble methods such as Random Forest and Gradient Boosting. 
     - One possible explanation for this discrepancy could be the dataset's size and complexity.  
     - Further refinement through hyperparameter tuning and exploration of advanced deep learning methodologies, such as encoding-decoding techniques, holds potential for optimizing this application.  
     - Model studies like ours hold significant potential for deployment in clinical settings such as hospitals and healthcare facilities. 
