@@ -54,13 +54,33 @@ def introduction():
 
 # ---- UCI Bilkent Dataset ----
 
+# Get the path to the directory containing uploaded files
+streamlit_static_path = os.getenv("STREAMLIT_STATIC_PATH", "not_found")
+
+# Check if the environment variable exists and is not empty
+if streamlit_static_path != "not_found" and streamlit_static_path:
+    models_dir = os.path.join(streamlit_static_path, "models")
+
+# Load the models using the constructed path
+ models = {
+     'logistic_regression': joblib.load(os.path.join(models_dir, 'uci_best_model_LogisticRegression.joblib')),
+     'random_forest': joblib.load(os.path.join(models_dir, 'uci_best_model_RandomForestClassifier.joblib')),
+     'elasticnet': joblib.load(os.path.join(models_dir, 'uci_best_model_ElasticNet.joblib')),
+     'svc': joblib.load(os.path.join(models_dir, 'uci_best_model_SVC.joblib')),
+     'adaboost': joblib.load(os.path.join(models_dir, 'uci_best_model_AdaBoostClassifier.joblib')),
+     'gradientboost': joblib.load(os.path.join(models_dir, 'uci_best_model_GradientBoostingClassifier.joblib')),
+     'xgboost': joblib.load(os.path.join(models_dir, 'uci_best_model_XGBClassifier.joblib'))
+     }
+else:
+    print("Error: STREAMLIT_STATIC_PATH environment variable not found or empty.")
+
 def uci_bilkent_dataset():
     st.title("UCI-Bilkent Dataset")
     selected_page = st.sidebar.selectbox("Select Page", ["Exploration", "Preprocessing and Feature Engineering", "Modelling"])
     # Read UCI-Bilkent Dataset
     df = pd.read_csv('uci-bilkent_arrhythmia_dataset_preprocessed.csv')
-    input_data = pd.read_csv('uci_x_test.csv')
-    target_values= pd.read_csv('uci_y_test.csv')
+    input_data = pd.read_csv('uci_x_train.csv')
+    target_values= pd.read_csv('uci_y_train.csv')
 
     if selected_page == "Exploration":
         st.write("## Exploratory Data Analysis")
@@ -75,7 +95,7 @@ def uci_bilkent_dataset():
         st.write("## Preprocessing and Feature Engineering")
 
     elif selected_page == "Modelling":
-        st.write("## Systematic comparison of different Machine Learning Models for Arrhythmia Classification")
+        st.write("## Systhematic comparison of different Machine Learning Models for Arrhythmia Classification")
         st.write('### Hyperparameter space for GridSearchCV')
         data = {
              "Model": ["Logistic Regression", "Random Forest", "Support Vector", "Elastic Net", "Gradient Boosting", "AdaBoost", "XGBoost"],
@@ -90,38 +110,8 @@ def uci_bilkent_dataset():
         }
         hyperparameter_table = pd.DataFrame(data)
         st.table(hyperparameter_table)
-        
-        # Get the path to the directory containing uploaded files
-        streamlit_static_path = os.getenv("STREAMLIT_STATIC_PATH", "not_found")
-
-        # Check if the environment variable exists and is not empty
-        if streamlit_static_path != "not_found" and streamlit_static_path:
-            models_dir = os.path.join(streamlit_static_path, "models")
-
-           # Load the models using the constructed path
-            models = {
-                'logistic_regression': joblib.load(os.path.join(models_dir, 'uci_best_model_LogisticRegression.joblib')),
-                'random_forest': joblib.load(os.path.join(models_dir, 'uci_best_model_RandomForestClassifier.joblib')),
-                'elasticnet': joblib.load(os.path.join(models_dir, 'uci_best_model_ElasticNet.joblib')),
-                'svc': joblib.load(os.path.join(models_dir, 'uci_best_model_SVC.joblib')),
-                'adaboost': joblib.load(os.path.join(models_dir, 'uci_best_model_AdaBoostClassifier.joblib')),
-                'gradientboost': joblib.load(os.path.join(models_dir, 'uci_best_model_GradientBoostingClassifier.joblib')),
-                'xgboost': joblib.load(os.path.join(models_dir, 'uci_best_model_XGBClassifier.joblib'))
-            }
-        else:
-            print("Error: STREAMLIT_STATIC_PATH environment variable not found or empty.")
- 
-#        # Load multiple models locally
-#        models = {
-#            'Logistic Regression' : joblib.load('models/uci_best_model_LogisticRegression.joblib'),
-#            'Random Forest' : joblib.load('models/uci_best_model_RandomForestClassifier.joblib'),
-#            'Support Vector' : joblib.load('models/uci_best_model_SVC.joblib'),
-#            'Elastic Net' : joblib.load('models/uci_best_model_ElasticNet.joblib'),
-#            'Gradient Boosting' : joblib.load('models/uci_best_model_GradientBoostingClassifier.joblib'),
-#            'AdaBoost' : joblib.load('models/uci_best_model_AdaBoostClassifier.joblib'),
-#            'XGBoost' : joblib.load('models/uci_best_model_XGBClassifier.joblib'),
-#        }
-
+       
+       # Load multiple models
         st.title('Model Selection')
 
         # Model selection widget
@@ -170,7 +160,6 @@ def uci_bilkent_dataset():
                 st.pyplot(fig)
         else:
             st.write('No model selected.')
-
         
 
 # ---- MIT BIH Dataset ----
