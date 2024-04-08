@@ -12,6 +12,7 @@ from sklearn.utils import resample
 from sklearn.metrics import accuracy_score, recall_score, classification_report, confusion_matrix
 import altair as alt 
 import networkx as nx
+import xgboost as xgb
 
 # ---- Page Title with Icon ----
 st.set_page_config(page_title='Arrhythmia Classification', page_icon=':anatomical_heart:', layout='wide')
