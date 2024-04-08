@@ -91,7 +91,7 @@ def uci_bilkent_dataset():
         st.write("## Preprocessing and Feature Engineering")
         
         # Load data
-        df = pd.read_csv('arrhythmia_preprocessed_cleaned_classes_label.csv')
+        df = pd.read_csv('UCI-BILKENT_Arrhythmia_Dataset_preprocessed_cleaned_classes_label.csv')
 
         # Separate features and target variable
         X = df.drop(['class','label'], axis=1)  # Features
