@@ -370,6 +370,9 @@ def conclusions():
 # ---- Main / Sidebar ----
 
 def main():
+    # Define models directory based on the current working directory
+    models_dir = os.path.join(os.getcwd(), "models")
+
     # Define models dictionary
     models = {
         'logistic_regression': joblib.load(os.path.join(models_dir, 'uci_best_model_LogisticRegression.joblib')),
