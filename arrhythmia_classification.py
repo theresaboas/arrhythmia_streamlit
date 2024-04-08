@@ -62,7 +62,7 @@ if streamlit_static_path != "not_found" and streamlit_static_path:
     models_dir = os.path.join(streamlit_static_path, "models")
 
 # Load the models using the constructed path
- models = {
+models = {
     'logistic_regression': joblib.load(os.path.join(models_dir, 'uci_best_model_LogisticRegression.joblib')),
     'random_forest': joblib.load(os.path.join(models_dir, 'uci_best_model_RandomForestClassifier.joblib')),
     'elasticnet': joblib.load(os.path.join(models_dir, 'uci_best_model_ElasticNet.joblib')),
