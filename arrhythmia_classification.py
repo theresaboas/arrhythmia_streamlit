@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 import joblib
 import seaborn as sns
 import requests
@@ -89,17 +90,20 @@ def uci_bilkent_dataset():
         }
         hyperparameter_table = pd.DataFrame(data)
         st.table(hyperparameter_table)
-       
-        # Load multiple models
+        
+        # Get the absolute path of the 'models' directory
+        models_dir = os.path.join(os.path.dirname(__file__), '..', 'models')
+
+        # Load the models using absolute paths
         models = {
-            'Logistic Regression' : joblib.load('models/uci_best_model_LogisticRegression.joblib'),
-            'Random Forest' : joblib.load('models/uci_best_model_RandomForestClassifier.joblib'),
-            'Support Vector' : joblib.load('models/uci_best_model_SVC.joblib'),
-            'Elastic Net' : joblib.load('models/uci_best_model_ElasticNet.joblib'),
-            'Gradient Boosting' : joblib.load('models/uci_best_model_GradientBoostingClassifier.joblib'),
-            'AdaBoost' : joblib.load('models/uci_best_model_AdaBoostClassifier.joblib'),
-            'XGBoost' : joblib.load('models/uci_best_model_XGBClassifier.joblib'),
-        }
+            'logistic_regression': joblib.load(os.path.join(models_dir, 'uci_best_model_LogisticRegression.joblib')),
+            'random_forest': joblib.load(os.path.join(models_dir, 'uci_best_model_RandomForestClassifier.joblib')),
+            'elasticnet': joblib.load(os.path.join(models_dir, 'uci_best_model_ElasticNet.joblib')),
+            'svc': joblib.load(os.path.join(models_dir, 'uci_best_model_SVC.joblib')),
+            'adaboost': joblib.load(os.path.join(models_dir, 'uci_best_model_AdaBoostClassifier.joblib')),
+            'gradientboost': joblib.load(os.path.join(models_dir, 'uci_best_model_GradientBoostingClassifier.joblib')),
+            'xgboost': joblib.load(os.path.join(models_dir, 'uci_best_model_XGBClassifier.joblib'))
+        }       
 
         st.title('Model Selection')
 
