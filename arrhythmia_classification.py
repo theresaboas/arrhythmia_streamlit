@@ -91,19 +91,36 @@ def uci_bilkent_dataset():
         hyperparameter_table = pd.DataFrame(data)
         st.table(hyperparameter_table)
         
-        # Get the absolute path of the 'models' directory
-        models_dir = os.path.join(os.path.dirname(__file__), '..', 'models')
+        # Get the path to the directory containing uploaded files
+        streamlit_static_path = os.getenv("STREAMLIT_STATIC_PATH", "not_found")
 
-        # Load the models using absolute paths
-        models = {
-            'logistic_regression': joblib.load(os.path.join(models_dir, 'uci_best_model_LogisticRegression.joblib')),
-            'random_forest': joblib.load(os.path.join(models_dir, 'uci_best_model_RandomForestClassifier.joblib')),
-            'elasticnet': joblib.load(os.path.join(models_dir, 'uci_best_model_ElasticNet.joblib')),
-            'svc': joblib.load(os.path.join(models_dir, 'uci_best_model_SVC.joblib')),
-            'adaboost': joblib.load(os.path.join(models_dir, 'uci_best_model_AdaBoostClassifier.joblib')),
-            'gradientboost': joblib.load(os.path.join(models_dir, 'uci_best_model_GradientBoostingClassifier.joblib')),
-            'xgboost': joblib.load(os.path.join(models_dir, 'uci_best_model_XGBClassifier.joblib'))
-        }       
+        # Check if the environment variable exists and is not empty
+        if streamlit_static_path != "not_found" and streamlit_static_path:
+            models_dir = os.path.join(streamlit_static_path, "models")
+
+           # Load the models using the constructed path
+            models = {
+                'logistic_regression': joblib.load(os.path.join(models_dir, 'uci_best_model_LogisticRegression.joblib')),
+                'random_forest': joblib.load(os.path.join(models_dir, 'uci_best_model_RandomForestClassifier.joblib')),
+                'elasticnet': joblib.load(os.path.join(models_dir, 'uci_best_model_ElasticNet.joblib')),
+                'svc': joblib.load(os.path.join(models_dir, 'uci_best_model_SVC.joblib')),
+                'adaboost': joblib.load(os.path.join(models_dir, 'uci_best_model_AdaBoostClassifier.joblib')),
+                'gradientboost': joblib.load(os.path.join(models_dir, 'uci_best_model_GradientBoostingClassifier.joblib')),
+                'xgboost': joblib.load(os.path.join(models_dir, 'uci_best_model_XGBClassifier.joblib'))
+            }
+        else:
+            print("Error: STREAMLIT_STATIC_PATH environment variable not found or empty.")
+ 
+#        # Load multiple models locally
+#        models = {
+#            'Logistic Regression' : joblib.load('models/uci_best_model_LogisticRegression.joblib'),
+#            'Random Forest' : joblib.load('models/uci_best_model_RandomForestClassifier.joblib'),
+#            'Support Vector' : joblib.load('models/uci_best_model_SVC.joblib'),
+#            'Elastic Net' : joblib.load('models/uci_best_model_ElasticNet.joblib'),
+#            'Gradient Boosting' : joblib.load('models/uci_best_model_GradientBoostingClassifier.joblib'),
+#            'AdaBoost' : joblib.load('models/uci_best_model_AdaBoostClassifier.joblib'),
+#            'XGBoost' : joblib.load('models/uci_best_model_XGBClassifier.joblib'),
+#        }
 
         st.title('Model Selection')
 
