@@ -320,7 +320,7 @@ def mit_bih_dataset():
         # Barplot with selectbox 
         bar_width = 0.15
         index = np.arange(len(models))
-        selected_model = st.selectbox("Select Model", models)
+        selected_model = st.select_slider("Select Model", options=models)
         fig, ax = plt.subplots(figsize=(12, 8))
         model_index = models.index(selected_model)
         colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728']
