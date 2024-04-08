@@ -74,7 +74,7 @@ if streamlit_static_path != "not_found" and streamlit_static_path:
 else:
     print("Error: STREAMLIT_STATIC_PATH environment variable not found or empty.")
 
-def uci_bilkent_dataset():
+def uci_bilkent_dataset(models):
     st.title("UCI-Bilkent Dataset")
     selected_page = st.sidebar.selectbox("Select Page", ["Exploration", "Preprocessing and Feature Engineering", "Modelling"])
     # Read UCI-Bilkent Dataset
@@ -160,7 +160,7 @@ def uci_bilkent_dataset():
                 st.pyplot(fig)
         else:
             st.write('No model selected.')
-        
+
 
 # ---- MIT BIH Dataset ----
 
@@ -370,12 +370,23 @@ def conclusions():
 # ---- Main / Sidebar ----
 
 def main():
+    # Define models dictionary
+    models = {
+        'logistic_regression': joblib.load(os.path.join(models_dir, 'uci_best_model_LogisticRegression.joblib')),
+        'random_forest': joblib.load(os.path.join(models_dir, 'uci_best_model_RandomForestClassifier.joblib')),
+        'elasticnet': joblib.load(os.path.join(models_dir, 'uci_best_model_ElasticNet.joblib')),
+        'svc': joblib.load(os.path.join(models_dir, 'uci_best_model_SVC.joblib')),
+        'adaboost': joblib.load(os.path.join(models_dir, 'uci_best_model_AdaBoostClassifier.joblib')),
+        'gradientboost': joblib.load(os.path.join(models_dir, 'uci_best_model_GradientBoostingClassifier.joblib')),
+        'xgboost': joblib.load(os.path.join(models_dir, 'uci_best_model_XGBClassifier.joblib'))
+    }
+
     st.sidebar.title("Classification of Arrhythmia")
     page = st.sidebar.radio("Contents", ["Introduction", "UCI-Bilkent Dataset", "MIT-BIH Dataset", "Conclusions"])
     if page == "Introduction":
         introduction()
     elif page == "UCI-Bilkent Dataset":
-        uci_bilkent_dataset()
+        uci_bilkent_dataset(models)
     elif page == "MIT-BIH Dataset":
         mit_bih_dataset()
     elif page == "Conclusions":
