@@ -63,14 +63,14 @@ if streamlit_static_path != "not_found" and streamlit_static_path:
 
 # Load the models using the constructed path
  models = {
-     'logistic_regression': joblib.load(os.path.join(models_dir, 'uci_best_model_LogisticRegression.joblib')),
-     'random_forest': joblib.load(os.path.join(models_dir, 'uci_best_model_RandomForestClassifier.joblib')),
-     'elasticnet': joblib.load(os.path.join(models_dir, 'uci_best_model_ElasticNet.joblib')),
-     'svc': joblib.load(os.path.join(models_dir, 'uci_best_model_SVC.joblib')),
-     'adaboost': joblib.load(os.path.join(models_dir, 'uci_best_model_AdaBoostClassifier.joblib')),
-     'gradientboost': joblib.load(os.path.join(models_dir, 'uci_best_model_GradientBoostingClassifier.joblib')),
-     'xgboost': joblib.load(os.path.join(models_dir, 'uci_best_model_XGBClassifier.joblib'))
-     }
+    'logistic_regression': joblib.load(os.path.join(models_dir, 'uci_best_model_LogisticRegression.joblib')),
+    'random_forest': joblib.load(os.path.join(models_dir, 'uci_best_model_RandomForestClassifier.joblib')),
+    'elasticnet': joblib.load(os.path.join(models_dir, 'uci_best_model_ElasticNet.joblib')),
+    'svc': joblib.load(os.path.join(models_dir, 'uci_best_model_SVC.joblib')),
+    'adaboost': joblib.load(os.path.join(models_dir, 'uci_best_model_AdaBoostClassifier.joblib')),
+    'gradientboost': joblib.load(os.path.join(models_dir, 'uci_best_model_GradientBoostingClassifier.joblib')),
+    'xgboost': joblib.load(os.path.join(models_dir, 'uci_best_model_XGBClassifier.joblib'))
+    }
 else:
     print("Error: STREAMLIT_STATIC_PATH environment variable not found or empty.")
 
