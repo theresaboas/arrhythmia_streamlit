@@ -52,6 +52,21 @@ def introduction():
     st.subheader("Step 3: Performance evaluation")
     st.write("This step involves systematically evaluating model performance based on metrics like accuracy and recall. A main focus is placed on the number of undetected arrhythmia cases as evident in number of false negatives.")
 
+# ---- Model Loading Function ----
+# Define a function to load the models
+@st.cache(allow_output_mutation=True)
+def load_models():
+    models = {
+        'Logistic Regression': joblib.load('uci_best_model_LogisticRegression.joblib'),
+        'Random Forest': joblib.load('uci_best_model_RandomForestClassifier.joblib'),
+        'Support Vector': joblib.load('uci_best_model_SVC.joblib'),
+        'Elastic Net': joblib.load('uci_best_model_ElasticNet.joblib'),
+        'Gradient Boosting': joblib.load('uci_best_model_GradientBoostingClassifier.joblib'),
+        'AdaBoost': joblib.load('uci_best_model_AdaBoostClassifier.joblib'),
+        'XGBoost': joblib.load('uci_best_model_XGBClassifier.joblib')
+    }
+    return models
+
 # ---- UCI Bilkent Dataset ----
 
 def uci_bilkent_dataset():
@@ -60,14 +75,14 @@ def uci_bilkent_dataset():
     # Read UCI-Bilkent Dataset
     df = pd.read_csv('uci-bilkent_arrhythmia_dataset_preprocessed.csv')
     input_data = pd.read_csv('uci_x_test.csv')
-    target_values= pd.read_csv('uci_y_test.csv')
+    target_values = pd.read_csv('uci_y_test.csv')
 
     if selected_page == "Exploration":
         st.write("## Exploratory Data Analysis")
         st.dataframe(df.head(10))
         st.write(df.shape)
         st.dataframe(df.describe())
-        
+
         if st.checkbox("Show NA"):
             st.dataframe(df.isna().sum())
 
@@ -78,29 +93,21 @@ def uci_bilkent_dataset():
         st.write("## Systematic comparison of different Machine Learning Models for Arrhythmia Classification")
         st.write('### Hyperparameter space for GridSearchCV')
         data = {
-             "Model": ["Logistic Regression", "Random Forest", "Support Vector", "Elastic Net", "Gradient Boosting", "AdaBoost", "XGBoost"],
+            "Model": ["Logistic Regression", "Random Forest", "Support Vector", "Elastic Net", "Gradient Boosting", "AdaBoost", "XGBoost"],
             "Hyperparameter Space": [
-        "solver: [liblinear, lbfgs]; C: np.logspace(-4, 2, 9)",
-        "n_estimators: [10, 50, 100, 250, 500, 1000]; min_samples_leaf: [1, 3, 5]; max_features: [sqrt, log2]",
-        "C: np.logspace(-4, 2, 9); kernel: [linear, rbf]",
-        "C: np.logspace(-4, 2, 9); l1_ratio: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]",
-        "n_estimators: [50, 100, 200]; learning_rate: [0.01, 0.1, 1.0]; max_depth: [3, 5, 7]",
-        "n_estimators: [50, 100, 200]; learning_rate: [0.01, 0.1, 1.0]",
-        "n_estimators: [50, 100, 200]; learning_rate: [0.01, 0.1, 1.0]; max_depth: [3, 5, 7]"]
+                "solver: [liblinear, lbfgs]; C: np.logspace(-4, 2, 9)",
+                "n_estimators: [10, 50, 100, 250, 500, 1000]; min_samples_leaf: [1, 3, 5]; max_features: [sqrt, log2]",
+                "C: np.logspace(-4, 2, 9); kernel: [linear, rbf]",
+                "C: np.logspace(-4, 2, 9); l1_ratio: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]",
+                "n_estimators: [50, 100, 200]; learning_rate: [0.01, 0.1, 1.0]; max_depth: [3, 5, 7]",
+                "n_estimators: [50, 100, 200]; learning_rate: [0.01, 0.1, 1.0]",
+                "n_estimators: [50, 100, 200]; learning_rate: [0.01, 0.1, 1.0]; max_depth: [3, 5, 7]"]
         }
         hyperparameter_table = pd.DataFrame(data)
         st.table(hyperparameter_table)
-       
+
         # Load multiple models
-        models = {
-            'Logistic Regression' : joblib.load('uci_best_model_LogisticRegression.joblib'),
-            'Random Forest' : joblib.load('uci_best_model_RandomForestClassifier.joblib'),
-            'Support Vector' : joblib.load('uci_best_model_SVC.joblib'),
-            'Elastic Net' : joblib.load('uci_best_model_ElasticNet.joblib'),
-            'Gradient Boosting' : joblib.load('uci_best_model_GradientBoostingClassifier.joblib'),
-            'AdaBoost' : joblib.load('uci_best_model_AdaBoostClassifier.joblib'),
-            'XGBoost' : joblib.load('uci_best_model_XGBClassifier.joblib'),
-        }
+        models = load_models()
 
         st.title('Model Selection')
 
@@ -119,14 +126,14 @@ def uci_bilkent_dataset():
             show_model_attributes = st.checkbox("Show Model Attributes")
             if show_model_attributes:
                 st.subheader('Model Attributes:')
-                model_attributes_box = st.empty()  
+                model_attributes_box = st.empty()
                 model_attributes = models[selected_model].get_params()
                 model_attributes_box.write(model_attributes)
 
             # Display performance summary
             if hasattr(models[selected_model], 'score'):
-                accuracy = models[selected_model].score(input_data, target_values)  
-                rounded_accuracy = round(accuracy, 4)  
+                accuracy = models[selected_model].score(input_data, target_values)
+                rounded_accuracy = round(accuracy, 4)
                 st.subheader('Model Performance Summary:')
                 st.write(f'Accuracy: {rounded_accuracy}')
 
@@ -134,11 +141,11 @@ def uci_bilkent_dataset():
             if hasattr(models[selected_model], 'predict'):
                 # Display classification report
                 st.subheader('Classification Report:')
-                report = classification_report(target_values, prediction)  
+                report = classification_report(target_values, prediction)
                 st.text(report)
 
                 st.subheader('Confusion Matrix:')
-                cm = confusion_matrix(target_values, prediction)  
+                cm = confusion_matrix(target_values, prediction)
 
                 # Plot confusion matrix
                 fig, ax = plt.subplots()
@@ -150,7 +157,6 @@ def uci_bilkent_dataset():
                 st.pyplot(fig)
         else:
             st.write('No model selected.')
-
         
 
 # ---- MIT BIH Dataset ----
