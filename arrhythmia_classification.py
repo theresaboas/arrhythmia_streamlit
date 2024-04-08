@@ -58,8 +58,8 @@ def uci_bilkent_dataset():
     selected_page = st.sidebar.selectbox("Select Page", ["Exploration", "Preprocessing and Feature Engineering", "Modelling"])
     # Read UCI-Bilkent Dataset
     df = pd.read_csv('uci-bilkent_arrhythmia_dataset_preprocessed.csv')
-    input_data = pd.read_csv('uci_x_train.csv')
-    target_values= pd.read_csv('uci_y_train.csv')
+    input_data = pd.read_csv('uci_x_test.csv')
+    target_values= pd.read_csv('uci_y_test.csv')
 
     if selected_page == "Exploration":
         st.write("## Exploratory Data Analysis")
@@ -74,7 +74,7 @@ def uci_bilkent_dataset():
         st.write("## Preprocessing and Feature Engineering")
 
     elif selected_page == "Modelling":
-        st.write("## Systhematic comparison of different Machine Learning Models for Arrhythmia Classification")
+        st.write("## Systematic comparison of different Machine Learning Models for Arrhythmia Classification")
         st.write('### Hyperparameter space for GridSearchCV')
         data = {
              "Model": ["Logistic Regression", "Random Forest", "Support Vector", "Elastic Net", "Gradient Boosting", "AdaBoost", "XGBoost"],
@@ -90,17 +90,17 @@ def uci_bilkent_dataset():
         hyperparameter_table = pd.DataFrame(data)
         st.table(hyperparameter_table)
        
-       # Load multiple models
+        # Load multiple models
         models = {
-        'logistic_regression' : joblib.load('models/uci_logistic_regression_model.joblib'),
-        'random_forest' : joblib.load('models/uci_random_forest_model.joblib'),
-        'svc' : joblib.load('models/uci_svc_model.joblib')
-        #'elasticnet' : joblib.load('models/uci_elasticnet_model.joblib'),
-        #'adaboost' : joblib.load('models/uci_adaboost_model.joblib'),
-        #'gradientboost' : joblib.load('models/uci_gradientboost_model.joblib'),
-        #'xgboost' : joblib.load('models/uci_xgboost_model.joblib')
+            'Logistic Regression' : joblib.load('models/uci_best_model_LogisticRegression.joblib'),
+            'Random Forest' : joblib.load('models/uci_best_model_RandomForestClassifier.joblib'),
+            'Support Vector' : joblib.load('models/uci_best_model_SVC.joblib'),
+            'Elastic Net' : joblib.load('models/uci_best_model_ElasticNet.joblib'),
+            'Gradient Boosting' : joblib.load('models/uci_best_model_GradientBoostingClassifier.joblib'),
+            'AdaBoost' : joblib.load('models/uci_best_model_AdaBoostClassifier.joblib'),
+            'XGBoost' : joblib.load('models/uci_best_model_XGBClassifier.joblib'),
         }
-        
+
         st.title('Model Selection')
 
         # Model selection widget
@@ -144,14 +144,11 @@ def uci_bilkent_dataset():
                 sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False, square=True, ax=ax)
                 ax.set_xlabel('Predicted')  # Fix here
                 ax.set_ylabel('Actual')
-    
+
                 # Display confusion matrix plot
                 st.pyplot(fig)
         else:
             st.write('No model selected.')
-
-
-
 
         
 
