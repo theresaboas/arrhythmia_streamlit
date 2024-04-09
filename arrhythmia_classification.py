@@ -365,20 +365,16 @@ def mit_bih_dataset():
 
 # ---- Conclusions ----
 
-def conclusions():
-    st.title("Conclusions")    
-    conclusion_text = """
-    Minimizing false negatives is crucial for our project's success.
-    - Gradient Boosting achieved the best performance among the models evaluated concerning the number of false negatives, with a very high accuracy of 98%. 
-    - DNN and ANN models achieved respectable accuracies ranging from 95% to 96%. 
-    - Overall, Deep learning models were outperformed by simpler models like ensemble methods such as Random Forest and Gradient Boosting. 
-    - One possible explanation for this discrepancy could be the dataset's size and complexity.  
-    - Further refinement through hyperparameter tuning and exploration of advanced deep learning methodologies, such as encoding-decoding techniques, holds potential for optimizing this application.  
-    - Model studies like ours hold significant potential for deployment in clinical settings such as hospitals and healthcare facilities. 
-    - The robust performance of models like Gradient Boosting, XGBoost, and Random Forest, coupled with their ability to minimize false negatives, makes them valuable tools for assisting healthcare professionals in arrhythmia diagnosis. 
+def summary():
+    st.header("Summary")
+    summary_text = """
+    - Gradient Boosting achieved best recall with a high accuracy of 98%
+    - DNN and ANN achieved accuracies ranging from 95% to 96%
+    - Deep Learning models got outperformed by simpler ensemble models
+    - One possible explanation for this discrepancy could be the dataset's size and complexity
     """
 
-    # Visualizations
+# Visualizations
     data = {
         'Model': ['Gradient Boosting', 'Random Forest', 'XG Boosting', 'DNN', 'Ada Boosting', 'Logistic Regression', 'ANN', 'Elastic Net'],
         'Test Accuracy': [0.98, 0.97, 0.98, 0.95, 0.95, 0.88, 0.94, 0.86],
@@ -416,8 +412,41 @@ def conclusions():
     st.altair_chart(bars, use_container_width=True)
 
     # Display conclusion text as bullet points with larger font size
-    st.write("## Conclusions:")
-    st.write(conclusion_text)
+    st.write(summary_text)
+
+def explorations():
+    st.header("Future Explorations")
+    explorations_text = """
+    - Further refinement through hyperparameter tuning
+    - Usage of advanced deep learning methodologies such as encoding-decoding techniques
+    - Exploring different sampling strategies like including patient data from other hospitals or using GAN's 
+    - Consultation with cardiologists and machine learning engineers for further improvement
+    - Classification of more nuanced heartbeat conditions
+    - Optimizing pre-processing for better applicability in real life data
+    """
+    st.write(explorations_text)
+    
+def relevance():
+    st.header("Relevance")
+    relevance_text = """
+    - Model studies demonstrate significant potential for deployment in clinical settings, such as hospitals and healthcare facilities
+    - Robust performance and ability to minimize false negatives of models like Gradient Boosting, XGBoost, and Random Forest, makes them valuable tools in arrhythmia diagnosis
+    - Interpretable models enhance transparency and understanding, facilitating collaboration between machine learning experts and healthcare professionals
+    - End user devices like smartwatches or portable ECG trackers could provide preventive care
+    - Scalability and individualization possibilities can improve patient care over populations, applications or time
+    """
+    st.write(relevance_text)
+    
+def conclusions():
+    st.title("Conclusions")
+    selected_page = st.sidebar.selectbox("Select Page", ["Summary", "Future Explorations", "Relevance"])
+    if selected_page == "Summary":
+        summary()
+    elif selected_page == "Future Explorations":
+        explorations()
+    elif selected_page == "Relevance":
+        relevance()
+        
 
 # ---- Main / Sidebar ----
 
