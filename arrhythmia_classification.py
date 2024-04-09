@@ -16,7 +16,7 @@ import xgboost as xgb
 from sklearn.preprocessing import StandardScaler
 
 # ---- Page Title with Icon ----
-st.set_page_config(page_title='Arrhythmia Classification', page_icon=':anatomical_heart:', layout='wide')
+st.set_page_config(page_title='Arrhythmia Classification', page_icon=':anatomical_heart:')
 
 # ---- Load GFX Assets ----
 
@@ -31,8 +31,6 @@ ecg_gfx = 'https://lottie.host/37bfe504-9620-477e-ad38-f32dfe93f35a/U98tiX7gVS.j
 # ---- Introduction ----
 
 def introduction():
-#    video_path = "ECG_video.mp4"
-#    st.video(video_path)
     st_lottie(ecg_gfx, height=250)
 
     st.title("Introduction")
@@ -55,7 +53,7 @@ def introduction():
 
 # ---- Model Loading Function ----
 # Define a function to load the models
-@st.cache(allow_output_mutation=True)
+@st.cache_resource
 def load_models():
     models = {
         'Logistic Regression': joblib.load('uci_best_model_LogisticRegression.joblib'),
@@ -74,7 +72,7 @@ def uci_bilkent_dataset():
     st.title("UCI-Bilkent Dataset")
     selected_page = st.sidebar.selectbox("Select Page", ["Exploration", "Preprocessing and Feature Engineering", "Modelling"])
     # Read UCI-Bilkent Dataset
-    df = pd.read_csv('uci-bilkent_arrhythmia_dataset_preprocessed.csv')
+    df = pd.read_csv('arrhythmia.csv')
     input_data = pd.read_csv('uci_x_test.csv')
     target_values = pd.read_csv('uci_y_test.csv')
 
@@ -87,11 +85,55 @@ def uci_bilkent_dataset():
         if st.checkbox("Show NA"):
             st.dataframe(df.isna().sum())
 
+        # Missing Values 
+        df_obj = df.select_dtypes(include=['object']).columns
+        for o in df_obj:
+            df[o] = pd.to_numeric(df[o], errors='coerce')
+
+        summary_df = df.isnull().sum()
+        missing_stats = summary_df[summary_df != 0].reset_index()
+        missing_stats.columns = ['column_name', 'no_of_missing']
+        missing_stats['percent_missing'] = (missing_stats['no_of_missing'] / len(df)) * 100
+
+        # Plotting the Missing Values
+        st.write("## Missing Values")
+        fig, ax = plt.subplots()
+        ax.bar(missing_stats['column_name'], missing_stats['no_of_missing'])
+        ax.set_title('Missing values')
+        ax.set_xlabel('Column Names')
+        ax.set_ylabel('Missing values')
+        ax.set_xticklabels(missing_stats['column_name'], rotation=90)
+        for i, value in enumerate(missing_stats['percent_missing']):
+            ax.text(i, missing_stats['no_of_missing'][i], f"{value:.1f}%", ha='center', va='bottom')
+        ax.set_ylim(0, len(df))
+        st.pyplot(fig)
+
+        # Distribution among Patient Age and Sex
+        st.write("## Distribution of Patients Age and Sex")
+        plt.figure(figsize=(10, 6))
+        df.groupby('sex')['age'].plot(kind='hist', alpha=0.5, legend=True)
+        plt.xlabel('Age')
+        plt.ylabel('Frequency')
+        plt.title('Distribution of Patients Age by Sex')
+        plt.legend(['Female', 'Male'])
+
+        # Pass the figure object to st.pyplot()
+        st.pyplot(plt.gcf())
+
+        # Distribution of Classes
+        st.write("## Distribution of Classes")
+        plt.figure(figsize=(10, 6))
+        sns.countplot(data=df, x='class')
+        plt.xlabel('Class')
+        plt.ylabel('Count')
+        plt.title('Distribution of Classes')
+        st.pyplot(plt.gcf())
+
     elif selected_page == "Preprocessing and Feature Engineering":
         st.write("## Preprocessing and Feature Engineering")
-        
+    
         # Load data
-        df = pd.read_csv('UCI-BILKENT_Arrhythmia_Dataset_preprocessed_cleaned_classes_label.csv')
+        df = pd.read_csv('UCI-BILKENT_Arrhythmia_Dataset_preprocessed_cleaned_classes_label.csv', sep=',', index_col=0)
 
         # Separate features and target variable
         X = df.drop(['class','label'], axis=1)  # Features
@@ -108,44 +150,40 @@ def uci_bilkent_dataset():
             return X_pca, pca.explained_variance_ratio_, pca.components_
 
         # Streamlit app
-        def main():
-            st.title("PCA Visualization")
+        st.title("PCA Visualization")
+    
+        # Slider for selecting number of PCA components
+        st.write("Select the Number of PCA Components")
+        n_components = st.select_slider("Number of PCA Components", options=[30, 40, 50, 55, 60, 65, 70, 75, 78, 80, 85, 90, 95, 100])
 
-            # Sidebar options
-            st.sidebar.header("Options")
-            n_components = st.sidebar.select_slider("Number of PCA Components", options=[30, 40, 50, 55, 60, 65, 70, 75, 78, 80, 85, 90, 95, 100])
+        # Perform PCA
+        X_pca, explained_variance_ratio, components = perform_pca(n_components)
 
-            # Perform PCA
-            X_pca, explained_variance_ratio, components = perform_pca(n_components)
+        # Display cumulative variance ratio plot
+        fig, ax = plt.subplots()
+        ax.plot(range(1, n_components+1), explained_variance_ratio.cumsum(), marker='o', linestyle='-')
+        ax.axhline(y=0.9, color='r', linestyle='--', label='90% Variance')
+        ax.set_xlabel("Number of Components")
+        ax.set_ylabel("Cumulative Variance Ratio")
+        ax.set_title("Cumulative Variance Ratio vs. Number of Components")
+        st.pyplot(fig)
 
-            # Display cumulative variance ratio plot
-            fig, ax = plt.subplots()
-            ax.plot(range(1, n_components+1), explained_variance_ratio.cumsum(), marker='o', linestyle='-')
-            ax.axhline(y=0.9, color='r', linestyle='--', label='90% Variance')
-            ax.set_xlabel("Number of Components")
-            ax.set_ylabel("Cumulative Variance Ratio")
-            ax.set_title("Cumulative Variance Ratio vs. Number of Components")
-            st.pyplot(fig)
+        # Display explained variance ratio for each component
+        st.subheader("Explained Variance Ratio for Each Component")
+        fig2, ax2 = plt.subplots()
+        ax2.plot(range(1, n_components+1), explained_variance_ratio, marker='o', linestyle='-')
+        ax2.set_xlabel("Number of Components")
+        ax2.set_ylabel("Explained Variance Ratio")
+        ax2.set_title("Explained Variance Ratio for Each Component")
+        st.pyplot(fig2)
 
-            # Display explained variance ratio for each component
-            st.subheader("Explained Variance Ratio for Each Component")
-            fig2, ax2 = plt.subplots()
-            ax2.plot(range(1, n_components+1), explained_variance_ratio, marker='o', linestyle='-')
-            ax2.set_xlabel("Number of Components")
-            ax2.set_ylabel("Explained Variance Ratio")
-            ax2.set_title("Explained Variance Ratio for Each Component")
-            st.pyplot(fig2)
-
-            # Display principal components
-            st.subheader("Principal Components")
-            components_df = pd.DataFrame(components, columns=X.columns)
-            st.write(components_df)
-
-        if __name__ == "__main__":       
-            main()
+        # Display principal components
+        st.subheader("Principal Components")
+        components_df = pd.DataFrame(components, columns=X.columns)
+        st.write(components_df)
 
     elif selected_page == "Modelling":
-        st.write("## Systematic comparison of different Machine Learning Models for Arrhythmia Classification")
+#        st.write("## Systematic comparison of different Machine Learning Models for Arrhythmia Classification")
         st.write('### Hyperparameter space for GridSearchCV')
         data = {
             "Model": ["Logistic Regression", "Random Forest", "Support Vector", "Elastic Net", "Gradient Boosting", "AdaBoost", "XGBoost"],
@@ -164,7 +202,11 @@ def uci_bilkent_dataset():
         # Load multiple models
         models = load_models()
 
-        st.title('Model Selection')
+        st.title('Model Results')
+
+        train_data_size = len(df)
+        test_data_size = len(input_data)
+        st.write("Size of Train Dataset:", train_data_size, '/ Size of Test Dataset:', test_data_size)
 
         # Model selection widget
         selected_model = st.selectbox('Select Model', list(models.keys()))
@@ -203,9 +245,9 @@ def uci_bilkent_dataset():
                 cm = confusion_matrix(target_values, prediction)
 
                 # Plot confusion matrix
-                fig, ax = plt.subplots()
+                fig, ax = plt.subplots(figsize=(8, 6))
                 sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False, square=True, ax=ax)
-                ax.set_xlabel('Predicted')  # Fix here
+                ax.set_xlabel('Predicted') 
                 ax.set_ylabel('Actual')
 
                 # Display confusion matrix plot
