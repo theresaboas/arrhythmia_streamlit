@@ -474,7 +474,25 @@ def mit_bih_dataset():
         image_path = "Figure_18.png"  
         image = open(image_path, 'rb').read()
         st.image(image, caption='Overall, Gradient Boost shows the smallest number of false negative. ', use_column_width=True)
+        
+    elif selected_page == "Deep Learning":
+        st.write("## Comparison of different Neural Network architectures for Arrhythmia Classification")
+        st.write('### Dense Neural Networks')
+        st.write("#### Confusion Matrices for DNNs with different activation functions")
+        image_path = "Figure_19.png"  
+        image = open(image_path, 'rb').read()
+        st.image(image, caption='', use_column_width=True)
 
+        st.write('### Artificial Neural Networks')
+        st.write("#### Confusion Matrices for ANNs with different activation functions")
+        image_path = "Figure_20.png"  
+        image = open(image_path, 'rb').read()
+        st.image(image, caption='', use_column_width=True)
+
+        st.write("### Precision-Recall Curves for DNN and ANN Trials")
+        image_path = "Figure_22.png"  
+        image = open(image_path, 'rb').read()
+        st.image(image, caption='', use_column_width=True)
 
 # ---- Conclusions ----
 
