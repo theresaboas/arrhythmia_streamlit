@@ -14,6 +14,8 @@ import altair as alt
 import networkx as nx
 import xgboost as xgb
 from sklearn.preprocessing import StandardScaler
+#from keras.models import load_model
+#import tensorflow as tf
 
 # ---- Page Title with Icon ----
 st.set_page_config(page_title='Arrhythmia Classification', page_icon=':anatomical_heart:')
@@ -54,8 +56,8 @@ def introduction():
 # ---- Model Loading Function ----
 # Define a function to load the models
 @st.cache_resource
-def load_models():
-    models = {
+def load_uci_models():
+    uci_models = {
         'Logistic Regression': joblib.load('uci_best_model_LogisticRegression.joblib'),
         'Random Forest': joblib.load('uci_best_model_RandomForestClassifier.joblib'),
         'Support Vector': joblib.load('uci_best_model_SVC.joblib'),
@@ -64,7 +66,32 @@ def load_models():
         'AdaBoost': joblib.load('uci_best_model_AdaBoostClassifier.joblib'),
         'XGBoost': joblib.load('uci_best_model_XGBClassifier.joblib')
     }
-    return models
+    return uci_models
+
+@st.cache_resource
+def load_mit_models():
+    mit_models = {
+        'Logistic Regression': joblib.load('mit_best_model_LogisticRegression.joblib'),
+        'Random Forest': joblib.load('mit_best_model_RandomForestClassifier.joblib'),
+#        'Support Vector': joblib.load('mit_best_model_SVC.joblib'),
+        'Elastic Net': joblib.load('mit_best_model_ElasticNet.joblib'),
+        'Gradient Boosting': joblib.load('mit_best_model_GradientBoostingClassifier.joblib'),
+        'AdaBoost': joblib.load('mit_best_model_AdaBoostClassifier.joblib'),
+        'XGBoost': joblib.load('mit_best_model_XGBClassifier.joblib')
+    }
+    return mit_models
+
+@st.cache_resource
+def load_deep_learning_models():
+    deep_learning_models ={    
+        "DNN_relu": joblib.load('mit_best_model_DNN_relu.joblib'),
+        "DNN_sigmoid": joblib.load('mit_best_model_DNN_sigmoid.joblib'),
+        "DNN_tanh": joblib.load('mit_best_model_DNN_tanh.joblib'),
+        "ANN_relu": joblib.load('mit_best_model_ANN_relu.joblib'),
+        "ANN_sigmoid": joblib.load('mit_best_model_ANN_sigmoid.joblib'),
+        "ANN_tanh": joblib.load('mit_best_model_ANN_tanh.joblib')
+    }
+    return deep_learning_models
 
 # ---- UCI Bilkent Dataset ----
 
@@ -200,7 +227,7 @@ def uci_bilkent_dataset():
         st.table(hyperparameter_table)
 
         # Load multiple models
-        models = load_models()
+        models = load_uci_models()
 
         st.title('Model Results')
 
@@ -259,11 +286,15 @@ def uci_bilkent_dataset():
 # ---- MIT BIH Dataset ----
 
 def mit_bih_dataset():
+    # Read MIT-BIH Dataset
+    df = pd.read_csv('MIT-BIH Arrhythmia Database.csv')
+    input_data = pd.read_csv('mit_x_test.csv')
+    target_values = pd.read_csv('mit_y_test.csv')
+
     st.title("MIT-BIH Dataset")
     selected_page = st.sidebar.selectbox("Select Page", ["Exploration and Preprocessing", "Modelling", "Deep Learning"])
 
-    # Read MIT-BIH Arrhythmia Dataset and Preprocessing needed for both page 1 and 2 
-    df = pd.read_csv('MIT-BIH Arrhythmia Database.csv')
+    # Adjust MIT-BIH Arrhythmia Dataset and Preprocessing needed for both page 1 and 2 
     df_orig = df.copy() 
     class_names = {'N': 'Normal', 'SVEB': 'Supraventricular ectopic beat', 'VEB': 'Ventricular ectopic beat', 'F': 'Fusion beat', 'Q': 'Unknown beat'}
     df['type'] = df['type'].map(class_names)
@@ -282,6 +313,8 @@ def mit_bih_dataset():
     X_balanced = balanced_df.drop(['label'], axis=1)
     y_balanced = balanced_df['label']
     X_train, X_test, y_train, y_test = train_test_split(X_balanced, y_balanced, test_size=0.2, random_state=42)
+#    input_data = X_test
+#    target_values = y_test
 
     if selected_page == "Exploration and Preprocessing":
         st.write("## Exploratory Data Analysis and Preprocessing")
@@ -328,9 +361,7 @@ def mit_bih_dataset():
         st.pyplot(plt)
 
     elif selected_page == "Modelling":
-        st.write("## Systhematic comparison of different Machine Learning Models for Arrhythmia Classification")
-        ###
-
+#        st.write("## Systematic comparison of different Machine Learning Models for Arrhythmia Classification")
         st.write('### Hyperparameter space for Randomized Search ')
         data = {
              "Model": ["Logistic Regression", "Random Forest", "Support Vector", "Elastic Net", "Gradient Boosting", "AdaBoost", "XGBoost"],
@@ -359,12 +390,70 @@ def mit_bih_dataset():
         recall = [0.87, 0.98, 0.80, 0.98, 0.94, 0.98]
         f1_score = [0.88, 0.98, 0.85, 0.98, 0.95, 0.98]
         auroc_score = [0.88, 0.98, 0.86, 0.98, 0.95, 0.98]
+
+        # Load multiple models
+        models = load_mit_models()
+
+        st.title('Model Results')
+
+        train_data_size = len(df)
+        test_data_size = len(input_data)
+        st.write("Size of Train Dataset:", train_data_size, '/ Size of Test Dataset:', test_data_size)
+
+        # Model selection widget
+        selected_model = st.selectbox('Select Model', list(models.keys()))
+
+        # Define a function to make predictions
+        def predict(model, input_data):
+            return model.predict(input_data)
+
+        # Make prediction based on selected model
+        if selected_model in models:
+            prediction = predict(models[selected_model], input_data)
+
+            # Display model attributes
+            show_model_attributes = st.checkbox("Show Model Attributes")
+            if show_model_attributes:
+                st.subheader('Model Attributes:')
+                model_attributes_box = st.empty()
+                model_attributes = models[selected_model].get_params()
+                model_attributes_box.write(model_attributes)
+
+            # Display performance summary
+            if hasattr(models[selected_model], 'score'):
+                accuracy = models[selected_model].score(input_data, target_values)
+                rounded_accuracy = round(accuracy, 4)
+                st.subheader('Model Performance Summary:')
+                st.write(f'Accuracy: {rounded_accuracy}')
+
+            # Display confusion matrix
+            if hasattr(models[selected_model], 'predict'):
+                # Display classification report
+                st.subheader('Classification Report:')
+                report = classification_report(target_values, prediction)
+                st.text(report)
+
+                st.subheader('Confusion Matrix:')
+                cm = confusion_matrix(target_values, prediction)
+
+                # Plot confusion matrix
+                fig, ax = plt.subplots(figsize=(8, 6))
+                sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False, square=True, ax=ax)
+                ax.set_xlabel('Predicted') 
+                ax.set_ylabel('Actual')
+
+                # Display confusion matrix plot
+                st.pyplot(fig)
+        else:
+            st.write('No model selected.')
+   
+        st.subheader('Model Performance Comparison:')
         # Barplot with selectbox 
         bar_width = 0.15
         index = np.arange(len(models))
-        selected_model = st.select_slider("Select Model", options=models)
+        selected_model = st.select_slider("Select Model", options=list(models.keys()))  # Get the keys of the dictionary
         fig, ax = plt.subplots(figsize=(12, 8))
-        model_index = models.index(selected_model)
+        model_index = list(models.keys()).index(selected_model)  # Find the index of the selected model key
         colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728']
         #colors = ['lightblue', 'lightgreen', 'lightcoral', 'yellow']
         for i, model in enumerate(models):
@@ -377,7 +466,7 @@ def mit_bih_dataset():
         ax.set_ylabel('Scores')
         ax.set_title('Comparison of Model Performances')
         ax.set_xticks(index)    
-        ax.set_xticklabels(models)
+        ax.set_xticklabels(list(models.keys()))  # Use the keys of the dictionary
         ax.legend(['Test Accuracy', 'Train Accuracy', 'Test Recall', 'Train Recall'], bbox_to_anchor=(1, 1), loc='upper left')
         st.pyplot(fig)
 
@@ -385,25 +474,7 @@ def mit_bih_dataset():
         image_path = "Figure_18.png"  
         image = open(image_path, 'rb').read()
         st.image(image, caption='Overall, Gradient Boost shows the smallest number of false negative. ', use_column_width=True)
-        
-    elif selected_page == "Deep Learning":
-        st.write("## Comparison of different Neural Network architectures for Arrhythmia Classification")
-        st.write('### Dense Neural Networks')
-        st.write("#### Confusion Matrices for DNNs with different activation functions")
-        image_path = "Figure_19.png"  
-        image = open(image_path, 'rb').read()
-        st.image(image, caption='', use_column_width=True)
 
-        st.write('### Artificial Neural Networks')
-        st.write("#### Confusion Matrices for ANNs with different activation functions")
-        image_path = "Figure_20.png"  
-        image = open(image_path, 'rb').read()
-        st.image(image, caption='', use_column_width=True)
-
-        st.write("### Precision-Recall Curves for DNN and ANN Trials")
-        image_path = "Figure_22.png"  
-        image = open(image_path, 'rb').read()
-        st.image(image, caption='', use_column_width=True)
 
 # ---- Conclusions ----
 
