@@ -361,7 +361,7 @@ def mit_bih_dataset():
         st.pyplot(plt)
 
     elif selected_page == "Modelling":
-#        st.write("## Systematic comparison of different Machine Learning Models for Arrhythmia Classification")
+#       st.write("## Systematic comparison of different Machine Learning Models for Arrhythmia Classification")
         st.write('### Hyperparameter space for Randomized Search ')
         data = {
              "Model": ["Logistic Regression", "Random Forest", "Support Vector", "Elastic Net", "Gradient Boosting", "AdaBoost", "XGBoost"],
@@ -376,7 +376,7 @@ def mit_bih_dataset():
         }
         hyperparameter_table = pd.DataFrame(data)
         st.table(hyperparameter_table)
-       
+####
         st.write('### Model Performance Comparison')
         # Barplot with selectbox 
         bar_width = 0.15
@@ -400,6 +400,8 @@ def mit_bih_dataset():
         ax.legend(['Test Accuracy', 'Train Accuracy', 'Test Recall', 'Train Recall'], bbox_to_anchor=(1, 1), loc='upper left')
         st.pyplot(fig)
 
+        ####
+        
         st.write("### Comparison of Confusion Matrices")
         image_path = "Figure_18.png"  
         image = open(image_path, 'rb').read()
