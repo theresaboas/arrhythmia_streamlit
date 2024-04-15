@@ -378,6 +378,19 @@ def mit_bih_dataset():
         st.table(hyperparameter_table)
 ####
         st.write('### Model Performance Comparison')
+        models = ["Logistic Regression", "Random Forest", "Elastic Net", "Gradient Boosting", "Ada Boosting", "XG Boosting"]
+        best_parameters = ["C: 3.162; penalty: l2", "max_features: log2; min_samples_leaf: 1; n_estimators: 250",
+                       "C: 0.01; l1_ratio: 0.4; max_iter: 1000; penalty: elasticnet; solver: saga",
+                       "learning_rate: 0.1; max_depth: 7; n_estimators: 200",
+                       "learning_rate: 1.0; n_estimators: 200",
+                       "learning_rate: 1.0; max_depth: 7; n_estimators: 200"]
+        train_accuracy = [0.88, 1.00, 0.86, 1.00, 0.96, 1.00]
+        test_accuracy = [0.88, 0.97, 0.86, 0.98, 0.95, 0.98]
+        precision = [0.90, 0.98, 0.91, 0.98, 0.95, 0.98]
+        recall = [0.87, 0.98, 0.80, 0.98, 0.94, 0.98]
+        f1_score = [0.88, 0.98, 0.85, 0.98, 0.95, 0.98]
+        auroc_score = [0.88, 0.98, 0.86, 0.98, 0.95, 0.98]
+
         # Barplot with selectbox 
         bar_width = 0.15
         index = np.arange(len(models))
@@ -409,18 +422,6 @@ def mit_bih_dataset():
         
         #####
         st.write("### Model Performance")
-        models = ["Logistic Regression", "Random Forest", "Elastic Net", "Gradient Boosting", "Ada Boosting", "XG Boosting"]
-        best_parameters = ["C: 3.162; penalty: l2", "max_features: log2; min_samples_leaf: 1; n_estimators: 250",
-                       "C: 0.01; l1_ratio: 0.4; max_iter: 1000; penalty: elasticnet; solver: saga",
-                       "learning_rate: 0.1; max_depth: 7; n_estimators: 200",
-                       "learning_rate: 1.0; n_estimators: 200",
-                       "learning_rate: 1.0; max_depth: 7; n_estimators: 200"]
-        train_accuracy = [0.88, 1.00, 0.86, 1.00, 0.96, 1.00]
-        test_accuracy = [0.88, 0.97, 0.86, 0.98, 0.95, 0.98]
-        precision = [0.90, 0.98, 0.91, 0.98, 0.95, 0.98]
-        recall = [0.87, 0.98, 0.80, 0.98, 0.94, 0.98]
-        f1_score = [0.88, 0.98, 0.85, 0.98, 0.95, 0.98]
-        auroc_score = [0.88, 0.98, 0.86, 0.98, 0.95, 0.98]
 
         # Load multiple models
         models = load_mit_models()
